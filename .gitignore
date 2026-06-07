@@ -1,0 +1,28 @@
+# Secrets
+.env
+
+# Vector index (large binary files; rebuild from PDFs)
+faiss_index/
+
+# PDFs — rebuild the index locally from your own data sheets
+*.pdf
+
+# Uploaded PDFs (transient; not source-controlled)
+/tmp/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
