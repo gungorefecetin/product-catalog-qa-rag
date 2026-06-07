@@ -15,7 +15,6 @@ from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
 from langchain_openai import ChatOpenAI
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from sentence_transformers import CrossEncoder
@@ -24,7 +23,7 @@ EMBED_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 INDEX_ROOT  = Path("faiss_index")
 LATEST_LINK = INDEX_ROOT / "latest"
 
-NOT_FOUND_SENTINEL = "Bu bilgi, yüklenen belgelerde mevcut değildir."
+NOT_FOUND_SENTINEL = "The requested information is not available in the uploaded documents."
 
 SYSTEM_PROMPT = PromptTemplate(
     input_variables=["context", "question"],
@@ -32,11 +31,11 @@ SYSTEM_PROMPT = PromptTemplate(
 Answer questions ONLY using the provided context chunks from product data sheets.
 Read ALL context chunks carefully — the product name and its properties may appear in different chunks.
 Rules:
-- Always state the exact product name (e.g. M901, Lavamani Sensation) before describing it.
-- If multiple products match, list all of them with their names and key properties.
-- If the user asks about "sabun" (soap) or skin-safe products, look for: el yıkama ürünü, sıvı sabun, antiseptik, cilt pH, hipoalerjik.
-- Always cite the page number in your answer.
-- If the answer is genuinely not present anywhere in the context, respond with this exact sentence: Bu bilgi, yüklenen belgelerde mevcut değildir.
+- Always state the exact product name before describing it.
+- If multiple products match the question, list all of them with their names and key properties.
+- Always cite the source page number in your answer.
+- Reply in the same language the user asked in.
+- If the answer is genuinely not present anywhere in the context, respond with this exact sentence: The requested information is not available in the uploaded documents.
 - Do not infer, extrapolate, or use external knowledge.
 
 Context:
@@ -104,8 +103,8 @@ def build_index(pdf_paths: list[str]) -> tuple[FAISS, int, list[dict]]:
         raise ValueError("Chunking produced zero segments. Check PDF content.")
 
     # Prepend the first non-empty line of each page (usually the section/product header)
-    # to every chunk from that page. This keeps category context inside every chunk,
-    # so retrieval doesn't confuse "Lavamani Sensation" soap with WC-cleaner on the same page.
+    # to every chunk from that page so retrieval doesn't confuse same-page products
+    # that share similar vocabulary but belong to different categories.
     page_headers: dict[tuple, str] = {}
     for doc in docs:
         key = (doc.metadata.get("source"), doc.metadata.get("page"))
