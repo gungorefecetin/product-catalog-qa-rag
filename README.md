@@ -2,8 +2,6 @@
 
 Upload product data sheet PDFs. Ask questions in natural language — Turkish or English. Get a grounded answer with the exact source paragraph, in seconds.
 
-Built as a Generative AI project for Eczacıbaşı Holding · June 2026.
-
 ---
 
 ## The problem
